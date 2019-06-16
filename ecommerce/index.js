@@ -4,6 +4,12 @@ const bodyParser = require('body-parser');
 const productsViewsRouter = require('./routes/views/products.views');
 const productsApiRouter = require('./routes/api/products.api');
 
+const {
+  logErrors,
+  clientErrorHandler,
+  errorHandler
+} = require('./utils/middlewares/errorsHandlers');
+
 // app
 const app = express();
 
@@ -24,6 +30,11 @@ app.get('/', (req, res, next) => {
 });
 app.use('/products', productsViewsRouter);
 app.use('/api/products', productsApiRouter);
+
+// error handlers
+app.use(logErrors);
+app.use(clientErrorHandler);
+app.use(errorHandler);
 
 // server
 const server = app.listen(8000, () => {
