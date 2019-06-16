@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const ProductsService = require('../../services/products.service');
+const validation = require('../../utils/middlewares/validationHandler');
+const { productIdSchema, productTagSchema, createProductSchema, updateProductSchema } = require('../../utils/schemas/products.schema');
+
 const productsService = new ProductsService();
 
 router.get('/', async function(req, res, next) {
@@ -9,9 +12,9 @@ router.get('/', async function(req, res, next) {
 
   try {
     // throwing an error
-    throw new Error('This is an error from the api');
+    // throw new Error('This is an error from the api');
     const products = await productsService.getProducts({ tags });
-  
+
     res.status(200).json({
       data: products,
       message: 'Products listed'
@@ -27,7 +30,7 @@ router.get('/:productId', async function(req, res, next) {
 
   try {
     const product = await productsService.getProduct({ productId });
-  
+
     res.status(200).json({
       data: product,
       message: 'Product retrieved'
@@ -37,13 +40,13 @@ router.get('/:productId', async function(req, res, next) {
   }
 });
 
-router.post('/', async function(req, res, next) {
+router.post('/', validation(createProductSchema), async function(req, res, next) {
   const { body: product } = req;
   console.log('request body:::::', req.body);
 
   try {
     const createdProduct = await productsService.createProduct({ product });
-  
+
     res.status(201).json({
       data: createdProduct,
       message: 'Product created'
@@ -53,14 +56,18 @@ router.post('/', async function(req, res, next) {
   }
 });
 
-router.put('/:productId', async function(req, res, next) {
+router.put('/:productId', validation({ productId: productIdSchema }, 'params'), validation(updateProductSchema), async function(
+  req,
+  res,
+  next
+) {
   const { productId } = req.params;
   const { body: product } = req;
   console.log('request params, body:::::', req.params, req.body);
 
   try {
     const updatedProduct = await productsService.updateProduct({ productId, product });
-  
+
     res.status(200).json({
       data: updatedProduct,
       message: 'Product updated'
@@ -76,7 +83,7 @@ router.delete('/:productId', async function(req, res, next) {
 
   try {
     const deletedProduct = await productsService.deleteProduct({ productId });
-  
+
     res.status(200).json({
       data: deletedProduct,
       message: 'Product deleted'
